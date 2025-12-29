@@ -9,6 +9,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <title>赵夏的英文名选择大冒险</title>
+    <script>
+        window.onerror = function (msg, url, line, col, error) {
+            if (msg.toLowerCase().includes('script error')) return;
+            alert("JS Error Triggered:\n" + msg + "\nLine: " + line);
+        };
+    </script>
     <!-- 生产环境优化: 使用 React 生产构建 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -25,7 +31,7 @@
     <div id="root"></div>
 
     <!-- 外部 JSX 文件 - 需要通过本地服务器运行 -->
-    <script type="text/babel" src="app_v5.jsx" data-presets="react"></script>
+    <script type="text/babel" src="app_v6.jsx" data-presets="react"></script>
 </body>
 
 </html>
