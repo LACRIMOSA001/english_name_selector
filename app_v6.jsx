@@ -40,7 +40,7 @@ const Icons = {
     Download: (props) => <Icon {...props} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></>} />,
     Share: (props) => <Icon {...props} path={<><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></>} />,
     Image: (props) => <Icon {...props} path={<><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></>} />,
-    QrCode: (props) => <Icon {...props} path={<circle cx="12" cy="12" r="10" />} />,
+    QrCode: (props) => <Icon {...props} path={<><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><path d="M10 3h4v4h-4z" opacity="0.5" /></>} />,
     Sparkles: (props) => <Icon {...props} path={<><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></>} />
 };
 
@@ -580,27 +580,59 @@ const SimpleCameraCapture = ({ onCapture }) => {
 
 // --- QR Code Component ---
 const QRCodeCanvas = ({ text, size = 128 }) => {
-    const canvasRef = useRef(null);
+    const [imgSrc, setImgSrc] = useState(null);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (canvasRef.current) {
-            // QRCode is global from the script tag
-            if (window.QRCode) {
-                window.QRCode.toCanvas(canvasRef.current, text, {
-                    width: size,
-                    margin: 2,
-                    color: {
-                        dark: '#0f172a', // Slate-900
-                        light: '#ffffff'
-                    }
-                }, function (error) {
-                    if (error) console.error(error);
-                });
+        // 延时一点点执行，确保 script 加载完成（虽然理论上早就加载了）
+        const timer = setTimeout(() => {
+            if (!window.QRCode) {
+                setError("QR Lib Missing");
+                return;
             }
-        }
+
+            try {
+                // 优先尝试 node-qrcode 的 toDataURL
+                if (window.QRCode.toDataURL) {
+                    window.QRCode.toDataURL(text, {
+                        width: size,
+                        margin: 1,
+                        color: {
+                            dark: '#0f172a', // Slate-900
+                            light: '#ffffff'
+                        }
+                    }, (err, url) => {
+                        if (err) {
+                            console.error(err);
+                            setError("Gen Error");
+                        } else {
+                            setImgSrc(url);
+                        }
+                    });
+                } else {
+                    setError("API Mismatch"); // 这里可能遇到版本不对
+                }
+            } catch (e) {
+                console.error(e);
+                setError("Run Error");
+            }
+        }, 100);
+        return () => clearTimeout(timer);
     }, [text, size]);
 
-    return <canvas ref={canvasRef} className="rounded-lg shadow-lg border-4 border-white" />;
+    if (error) {
+        return (
+            <div className="flex items-center justify-center bg-slate-100 text-slate-400 font-mono text-xs border-2 border-dashed border-slate-300 rounded-lg" style={{ width: size, height: size }}>
+                NO QR
+            </div>
+        );
+    }
+
+    if (!imgSrc) {
+        return <div className="animate-pulse bg-slate-200 rounded-lg" style={{ width: size, height: size }} />;
+    }
+
+    return <img src={imgSrc} className="rounded-lg shadow-lg border-4 border-white" style={{ width: size, height: size }} alt="Agent QR" />;
 };
 
 // --- ID Card Back Component ---
