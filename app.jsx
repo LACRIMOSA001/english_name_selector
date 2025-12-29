@@ -1195,9 +1195,19 @@ function App() {
 
             {viewState === 'grid' && (
                 <div className="app-screen bg-slate-900 text-slate-100 pb-20">
-                    <nav className="p-4 md:p-6 flex justify-between items-center max-w-6xl mx-auto">
-                        <div className="text-xl md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">ZHAO XIA</div>
-                        <div className="px-3 py-1 md:px-4 md:py-2 rounded-full bg-slate-800 text-xs md:text-sm font-bold border border-slate-700 text-slate-400 mr-24 md:mr-0">Agent Age: 8</div>
+                    <nav className="p-4 pt-6 md:p-6 flex items-center max-w-6xl mx-auto relative z-20">
+                        <div className="flex items-center gap-3">
+                            <div className="text-2xl md:text-3xl font-black tracking-tighter italic bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.4)]">
+                                ZHAO XIA
+                            </div>
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded border border-indigo-400/30 bg-indigo-500/10 backdrop-blur-sm text-indigo-200 text-[10px] md:text-xs font-mono tracking-wider shadow-[0_0_10px_rgba(99,102,241,0.1)]">
+                                <span className="opacity-70">STATUS:</span>
+                                <span className="font-bold text-cyan-400">ACTIVE</span>
+                                <div className="w-px h-3 bg-indigo-500/30 mx-1"></div>
+                                <span className="opacity-70">AGE:</span>
+                                <span className="font-bold text-cyan-400">08</span>
+                            </div>
+                        </div>
                     </nav>
                     <header className="text-center py-8 md:py-16 px-4 max-w-4xl mx-auto relative">
                         {!isMuted && (
