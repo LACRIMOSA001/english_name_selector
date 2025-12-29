@@ -587,46 +587,38 @@ const SimpleCameraCapture = ({ onCapture }) => {
     );
 };
 
-// Reliable Hybrid QRCode Component
 const QRCodeCanvas = ({ text, size = 128 }) => {
     const canvasRef = useRef(null);
-    const [useApi, setUseApi] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Delay slightly to ensure library is available
-        const timer = setTimeout(() => {
-            if (canvasRef.current && window.QRious && !useApi) {
-                try {
-                    new window.QRious({
-                        element: canvasRef.current,
-                        value: text,
-                        size: size,
-                        background: 'white',
-                        foreground: '#0f172a',
-                        level: 'H'
-                    });
-                } catch (e) {
-                    console.warn("Local QR render failed, fallback to API", e);
-                    setUseApi(true);
-                }
-            } else if (!window.QRious) {
-                console.warn("QR Lib not found, fallback to API");
-                setUseApi(true);
+        // 简单粗暴：如果有库就画，没有就报错
+        if (!window.QRious) {
+            setError("ERR: QRious Not Loaded");
+            return;
+        }
+        if (canvasRef.current) {
+            try {
+                new window.QRious({
+                    element: canvasRef.current,
+                    value: text,
+                    size: size,
+                    background: 'white',
+                    foreground: '#0f172a',
+                    level: 'H'
+                });
+            } catch (e) {
+                console.error(e);
+                setError("ERR: Render Failed");
             }
-        }, 50);
-        return () => clearTimeout(timer);
-    }, [text, size, useApi]);
+        }
+    }, [text, size]);
 
-    if (useApi) {
-        // Fallback: Online API
-        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&color=0f172a&bgcolor=ffffff&margin=2`;
+    if (error) {
         return (
-            <img
-                src={apiUrl}
-                className="rounded-lg shadow-lg border-4 border-white block bg-white"
-                style={{ width: size, height: size }}
-                alt="Agent QR"
-            />
+            <div className="flex items-center justify-center bg-red-600 text-white font-mono text-[10px] p-2 break-all text-center rounded-lg shadow-lg border-4 border-red-800" style={{ width: size, height: size }}>
+                {error}
+            </div>
         );
     }
 
