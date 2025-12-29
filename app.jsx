@@ -533,6 +533,47 @@ const CameraCapture = ({ onCapture }) => {
     );
 };
 
+// --- Simple Camera Component (Native File Input Only) ---
+const SimpleCameraCapture = ({ onCapture }) => {
+    const fileInputRef = useRef(null);
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Compress/Resize image before processing if needed, but for now direct read
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                onCapture(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-4 my-6">
+            <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileUpload}
+            />
+            <button
+                onClick={() => fileInputRef.current?.click()}
+                className="group flex flex-col items-center justify-center gap-3 bg-slate-800/80 hover:bg-slate-700 text-white w-full max-w-xs h-32 rounded-2xl border-2 border-dashed border-slate-600 hover:border-indigo-500 transition-all shadow-lg active:scale-95 px-6"
+            >
+                <div className="p-3 bg-indigo-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <Icons.Camera size={24} />
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="font-bold text-sm">点击拍摄 / 上传照片</span>
+                    <span className="text-[10px] text-slate-400 mt-1">支持相机和相册</span>
+                </div>
+            </button>
+        </div>
+    );
+};
+
 // --- SUCCESS SCREEN (Agent ID Card Version) ---
 const SuccessScreen = ({ data, onReset }) => {
     const [photo, setPhoto] = useState(null);
@@ -626,7 +667,7 @@ const SuccessScreen = ({ data, onReset }) => {
                     </div>
 
                     {/* 拍照组件 */}
-                    {!photo && <CameraCapture onCapture={setPhoto} />}
+                    {!photo && <SimpleCameraCapture onCapture={setPhoto} />}
                     {photo && (
                         <button onClick={() => setPhoto(null)} className="text-sm text-slate-500 underline">
                             重新拍摄
@@ -1150,7 +1191,7 @@ function App() {
             </button>
 
             {viewState === 'grid' && (
-                <div className="min-h-screen bg-slate-900 text-slate-100 pb-20">
+                <div className="app-screen bg-slate-900 text-slate-100 pb-20">
                     <nav className="p-4 md:p-6 flex justify-between items-center max-w-6xl mx-auto">
                         <div className="text-xl md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">ZHAO XIA</div>
                         <div className="px-3 py-1 md:px-4 md:py-2 rounded-full bg-slate-800 text-xs md:text-sm font-bold border border-slate-700 text-slate-400 mr-24 md:mr-0">Agent Age: 8</div>
