@@ -760,7 +760,7 @@ const SuccessScreen = ({ data, onReset }) => {
 
                 {/* 左侧：操作区 */}
                 <div className="flex-1 flex flex-col items-center text-center space-y-6">
-                    <h1 className="text-4xl font-black mb-2">任务完成！(V8)</h1>
+                    <h1 className="text-4xl font-black mb-2">任务完成！</h1>
                     <p className="text-xl text-slate-600">你的特工代号是：</p>
                     <div className={`text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r ${data.color}`}>
                         {data.name}
@@ -879,9 +879,8 @@ const SuccessScreen = ({ data, onReset }) => {
             </div>
 
             {/* Hidden Back Card Render */}
-            {/* Debug: 可见渲染 (放到底部，opacity 降低，证明它存在) */}
-            <div className="flex flex-col items-center mt-12 mb-8 opacity-80 scale-90 origin-top">
-                <p className="text-xs text-slate-400 mb-2 font-mono">--- BACK CARD PREVIEW (DEBUG) ---</p>
+            {/* Hidden Back Card Render for Capture */}
+            <div className="fixed left-[100vw] top-0 pointer-events-none opacity-0">
                 <IDCardBack data={data} cardRef={backCardRef} />
             </div>
         </div>
