@@ -769,7 +769,7 @@ const SuccessScreen = ({ data, onReset }) => {
 
                 {/* 左侧：操作区 */}
                 <div className="flex-1 flex flex-col items-center text-center space-y-6">
-                    <h1 className="text-4xl font-black mb-2">任务完成！</h1>
+                    <h1 className="text-4xl font-black mb-2">任务完成！(V5)</h1>
                     <p className="text-xl text-slate-600">你的特工代号是：</p>
                     <div className={`text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r ${data.color}`}>
                         {data.name}
