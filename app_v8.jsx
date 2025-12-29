@@ -888,6 +888,16 @@ const SuccessScreen = ({ data, onReset }) => {
             </div>
 
             {/* Hidden Back Card Render */}
+            {/* Visual Back Card Preview */}
+            <div className="flex flex-col items-center mt-12 mb-16 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <div className="text-slate-400 text-[10px] font-bold tracking-[0.3em] uppercase mb-6 opacity-60">
+                    - Classified Back -
+                </div>
+                <div className="origin-top scale-[0.85] md:scale-100 shadow-2xl rounded-3xl">
+                    <IDCardBack data={data} />
+                </div>
+            </div>
+
             {/* Hidden Back Card Render for Capture */}
             <div className="fixed left-[100vw] top-0 pointer-events-none opacity-0">
                 <IDCardBack data={data} cardRef={backCardRef} />
