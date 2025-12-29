@@ -64,7 +64,7 @@ const BGM_VOLUMES = {
     xavier: 0.25, // 下调：Space 1990 本身响度较大
     julian: 0.4,  // 中等
     sean: 0.6,    // 上调：Cool Vibes 开头较弱
-    success: 0.5
+    success: 0.3  // 下调 40% (0.5 -> 0.3)
 };
 
 // --- NARRATION AUDIO URLS (预生成的TTS音频文件) ---
