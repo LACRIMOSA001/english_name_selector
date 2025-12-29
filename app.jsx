@@ -147,29 +147,32 @@ const NAMES_DATA = [
 const HeroCard = ({ data, onClick }) => (
     <div
         onClick={onClick}
-        className="group relative h-[420px] md:h-[500px] w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20"
+        className="group relative aspect-[4/5] w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20"
     >
         <div className={`absolute inset-0 bg-gradient-to-br ${data.color} opacity-80 transition-opacity group-hover:opacity-100`}></div>
         <div className="absolute -right-6 -bottom-6 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110 text-white md:-right-10 md:-bottom-10">
             {data.visualElement}
         </div>
-        <div className="relative z-10 flex h-full flex-col p-6 md:p-8 text-white">
-            <div className="mb-4 w-fit rounded-xl bg-white/20 p-3 backdrop-blur-md shadow-lg">
-                {data.id === 'xavier' && <Icons.Brain size={24} />}
-                {data.id === 'julian' && <Icons.Crown size={24} />}
-                {data.id === 'sean' && <Icons.Music size={24} />}
-            </div>
-            <h3 className="mb-1 text-3xl md:text-5xl font-black uppercase tracking-tighter">{data.name}</h3>
-
-            <div className="flex flex-col items-start gap-1 mb-6">
-                <span className="font-mono text-sm md:text-base text-white/80 bg-black/20 px-2 py-0.5 rounded">{data.ipa}</span>
-                <span className="font-serif text-lg md:text-xl italic opacity-90">{data.cnName}</span>
+        <div className="relative z-10 flex h-full flex-col justify-between p-6 md:p-8 text-white">
+            <div className="w-fit rounded-xl bg-white/20 p-3 backdrop-blur-md shadow-lg">
+                {data.id === 'xavier' && <Icons.Brain size={28} />}
+                {data.id === 'julian' && <Icons.Crown size={28} />}
+                {data.id === 'sean' && <Icons.Music size={28} />}
             </div>
 
-            <div className="mt-auto">
-                <p className="font-bold text-lg">{data.tagline}</p>
-                <div className="mt-4 flex items-center gap-2 text-sm font-medium opacity-100 md:opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    <span>点击解锁档案</span> <Icons.ArrowRight size={16} />
+            <div className="space-y-2">
+                <h3 className="text-5xl font-black uppercase tracking-tighter leading-none">{data.name}</h3>
+                <div className="flex items-center gap-2">
+                    <span className="bg-black/30 px-2 py-1 rounded text-sm font-mono tracking-wider opacity-80">{data.ipa}</span>
+                </div>
+                <p className="text-2xl font-bold opacity-90">{data.cnName}</p>
+            </div>
+
+            <div>
+                <p className="font-bold text-lg opacity-80 mb-2">{data.tagline}</p>
+                <div className="flex items-center gap-2 text-sm font-bold opacity-70 group-hover:opacity-100 transition-opacity">
+                    <span>点击解锁档案</span>
+                    <Icons.ArrowRight size={16} />
                 </div>
             </div>
         </div>
