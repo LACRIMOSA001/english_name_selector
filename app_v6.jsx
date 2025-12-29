@@ -580,59 +580,28 @@ const SimpleCameraCapture = ({ onCapture }) => {
 
 // --- QR Code Component ---
 const QRCodeCanvas = ({ text, size = 128 }) => {
-    const [imgSrc, setImgSrc] = useState(null);
-    const [error, setError] = useState(null);
+    const canvasRef = useRef(null);
 
     useEffect(() => {
-        // 延时一点点执行，确保 script 加载完成（虽然理论上早就加载了）
-        const timer = setTimeout(() => {
-            if (!window.QRCode) {
-                setError("QR Lib Missing");
-                return;
-            }
-
+        // 使用 QRious 生成二维码 (同步且稳定)
+        if (canvasRef.current && window.QRious) {
             try {
-                // 优先尝试 node-qrcode 的 toDataURL
-                if (window.QRCode.toDataURL) {
-                    window.QRCode.toDataURL(text, {
-                        width: size,
-                        margin: 1,
-                        color: {
-                            dark: '#0f172a', // Slate-900
-                            light: '#ffffff'
-                        }
-                    }, (err, url) => {
-                        if (err) {
-                            console.error(err);
-                            setError("Gen Error");
-                        } else {
-                            setImgSrc(url);
-                        }
-                    });
-                } else {
-                    setError("API Mismatch"); // 这里可能遇到版本不对
-                }
+                new window.QRious({
+                    element: canvasRef.current,
+                    value: text,
+                    size: size,
+                    background: 'white',
+                    foreground: '#0f172a',
+                    level: 'H' // 高容错率
+                });
             } catch (e) {
-                console.error(e);
-                setError("Run Error");
+                console.error("QRious Error:", e);
+                alert("QR Generation Failed");
             }
-        }, 100);
-        return () => clearTimeout(timer);
+        }
     }, [text, size]);
 
-    if (error) {
-        return (
-            <div className="flex items-center justify-center bg-slate-100 text-slate-400 font-mono text-xs border-2 border-dashed border-slate-300 rounded-lg" style={{ width: size, height: size }}>
-                NO QR
-            </div>
-        );
-    }
-
-    if (!imgSrc) {
-        return <div className="animate-pulse bg-slate-200 rounded-lg" style={{ width: size, height: size }} />;
-    }
-
-    return <img src={imgSrc} className="rounded-lg shadow-lg border-4 border-white" style={{ width: size, height: size }} alt="Agent QR" />;
+    return <canvas ref={canvasRef} className="rounded-lg shadow-lg border-4 border-white" />;
 };
 
 // --- ID Card Back Component ---
@@ -802,7 +771,7 @@ const SuccessScreen = ({ data, onReset }) => {
 
                 {/* 左侧：操作区 */}
                 <div className="flex-1 flex flex-col items-center text-center space-y-6">
-                    <h1 className="text-4xl font-black mb-2">任务完成！(V6)</h1>
+                    <h1 className="text-4xl font-black mb-2">任务完成！(V6.1)</h1>
                     <p className="text-xl text-slate-600">你的特工代号是：</p>
                     <div className={`text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r ${data.color}`}>
                         {data.name}
@@ -921,7 +890,9 @@ const SuccessScreen = ({ data, onReset }) => {
             </div>
 
             {/* Hidden Back Card Render */}
-            <div className="fixed left-[100vw] top-0 pointer-events-none opacity-0">
+            {/* Debug: 可见渲染 (放到底部，opacity 降低，证明它存在) */}
+            <div className="flex flex-col items-center mt-12 mb-8 opacity-80 scale-90 origin-top">
+                <p className="text-xs text-slate-400 mb-2 font-mono">--- BACK CARD PREVIEW (DEBUG) ---</p>
                 <IDCardBack data={data} cardRef={backCardRef} />
             </div>
         </div>
