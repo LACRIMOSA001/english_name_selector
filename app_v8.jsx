@@ -914,6 +914,7 @@ function App() {
 
     // Audio Refs
     const bgmRefs = useRef({});
+    const fadeIntervalsRef = useRef(new Map()); // Manage fade animations
     const narrationAudioRef = useRef(null);
 
     // --- 1. Audio Initialization ---
@@ -1057,23 +1058,73 @@ function App() {
     };
 
     // --- 3. Audio Control Functions ---
-    const fadeInAudio = (audio, targetVolume = 0.5, duration = 2000) => {
-        // SIMPLIFIED: Direct play to debug silence issue
-        try {
-            audio.volume = targetVolume;
-            if (audio.paused) {
-                const p = audio.play();
-                if (p) p.catch(e => console.log("FadeIn Play Err: " + e.message));
-            }
-        } catch (e) {
-            console.log("FadeIn Err: " + e.message);
+    // Smooth Vol Crossfader
+    const fadeAudioTo = (audio, targetVol, duration = 1000) => {
+        if (!audio) return;
+
+        // 1. Clear existing fade task
+        if (fadeIntervalsRef.current.has(audio)) {
+            clearInterval(fadeIntervalsRef.current.get(audio));
+            fadeIntervalsRef.current.delete(audio);
         }
+
+        // 2. Ensure playing if fading in
+        if (targetVol > 0 && audio.paused) {
+            if (audio.currentTime === 0) audio.volume = 0;
+            const p = audio.play();
+            if (p) p.catch(() => { });
+        }
+
+        const startVol = audio.volume;
+        const diff = targetVol - startVol;
+        // 50ms per step
+        const steps = Math.floor(Math.max(50, duration) / 50);
+        const stepVol = diff / steps;
+        let currentStep = 0;
+
+        // Immediate set if duration is near 0
+        if (duration <= 50) {
+            audio.volume = targetVol;
+            if (targetVol <= 0.01) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            return;
+        }
+
+        const intervalId = setInterval(() => {
+            currentStep++;
+            let newVol = startVol + (stepVol * currentStep);
+
+            // Boundary & Completion Check
+            let finished = false;
+            // Epsilon check or strict boundary
+            if ((stepVol > 0 && newVol >= targetVol) || (stepVol < 0 && newVol <= targetVol)) {
+                newVol = targetVol;
+                finished = true;
+            }
+
+            // Safety Clamp
+            audio.volume = Math.max(0, Math.min(1, newVol));
+
+            if (finished || currentStep >= steps) {
+                clearInterval(intervalId);
+                fadeIntervalsRef.current.delete(audio);
+                // Stop if faded out
+                if (targetVol <= 0.01) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+            }
+        }, 50);
+
+        fadeIntervalsRef.current.set(audio, intervalId);
     };
 
     const playBgm = (key) => {
-        console.log(`Playing BGM: ${key}`);
+        console.log(`Crossfading BGM to: ${key}`);
 
-        // 先停止当前旁白，避免音频重叠
+        // Stop narration abruptly to clear stage for music change
         if (narrationAudioRef.current && !narrationAudioRef.current.paused) {
             narrationAudioRef.current.pause();
             narrationAudioRef.current.currentTime = 0;
@@ -1083,21 +1134,14 @@ function App() {
 
         Object.entries(bgmRefs.current).forEach(([k, audio]) => {
             if (k === key) {
-                try {
-                    // 使用预设的基准音量
-                    audio.volume = BGM_VOLUMES[k] || 0.5;
-                    audio.currentTime = 0; // 从头开始播放
-                    if (audio.paused) {
-                        const p = audio.play();
-                        if (p) p.catch(e => console.log(`PlayBgm [${k}] Err: ${e.message}`));
-                    }
-                } catch (e) {
-                    console.log(`Audio Access Err: ${e.message}`);
-                }
+                // Target: Fade In
+                const targetVol = BGM_VOLUMES[k] || 0.5;
+                fadeAudioTo(audio, targetVol, 2000);
             } else {
-                // 立即停止其他音频
-                audio.pause();
-                audio.currentTime = 0;
+                // Others: Fade Out
+                if (!audio.paused || audio.volume > 0) {
+                    fadeAudioTo(audio, 0, 1500);
+                }
             }
         });
     };
@@ -1108,22 +1152,23 @@ function App() {
         if (!audioUrl) return;
 
         narrationAudioRef.current.src = audioUrl;
-        narrationAudioRef.current.volume = 1.0; // 确保旁白始终最大声
+        narrationAudioRef.current.volume = 1.0;
 
-        // Ducking Logic (Aggressive)
+        // Smooth Ducking
         narrationAudioRef.current.onplay = () => {
             setIsSpeaking(true);
-            // 激进闪避：将所有正在播放的 BGM 压低到 5%
             Object.values(bgmRefs.current).forEach(bgm => {
-                if (!bgm.paused) bgm.volume = 0.05;
+                if (!bgm.paused) fadeAudioTo(bgm, 0.05, 800); // 0.8s smooth duck
             });
         };
 
         narrationAudioRef.current.onended = () => {
             setIsSpeaking(false);
-            // 恢复音量：根据各自的基准音量恢复
             Object.entries(bgmRefs.current).forEach(([k, bgm]) => {
-                if (!bgm.paused) bgm.volume = BGM_VOLUMES[k] || 0.5;
+                if (!bgm.paused) {
+                    const target = BGM_VOLUMES[k] || 0.5;
+                    fadeAudioTo(bgm, target, 2000); // 2s smooth release
+                }
             });
         };
 
@@ -1149,7 +1194,7 @@ function App() {
         setHasStarted(true);
         setIsMuted(false);
         const gridBgm = bgmRefs.current['grid'];
-        if (gridBgm) fadeInAudio(gridBgm, 0.5, 2000);
+        if (gridBgm) fadeAudioTo(gridBgm, BGM_VOLUMES['grid'], 3000); // Slower start
     };
 
     const toggleMute = () => {
