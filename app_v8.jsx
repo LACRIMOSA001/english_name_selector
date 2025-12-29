@@ -578,50 +578,19 @@ const SimpleCameraCapture = ({ onCapture }) => {
     );
 };
 
-// --- QR Code Component ---
+// Cloud-based QRCode Component (No JS Library needed)
 const QRCodeCanvas = ({ text, size = 128 }) => {
-    const canvasRef = useRef(null);
-    const [useApi, setUseApi] = useState(false);
+    // 强制使用在线 API，稳定可靠，无需加载任何 JS 库
+    const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&color=0f172a&bgcolor=ffffff&margin=2`;
 
-    useEffect(() => {
-        // 1. 检查 QRious 库是否存在
-        if (window.QRious && !useApi) {
-            if (canvasRef.current) {
-                try {
-                    new window.QRious({
-                        element: canvasRef.current,
-                        value: text,
-                        size: size,
-                        background: 'white',
-                        foreground: '#0f172a',
-                        level: 'H'
-                    });
-                } catch (e) {
-                    console.warn("QRious render failed, fallback to API");
-                    setUseApi(true);
-                }
-            }
-        } else {
-            // 库不存在，直接使用 API
-            setUseApi(true);
-        }
-    }, [text, size, useApi]);
-
-    if (useApi) {
-        // 2. 在线 API 兜底 (保证绝对能显示)
-        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&color=0f172a&bgcolor=ffffff&margin=2`;
-        return (
-            <img
-                src={apiUrl}
-                className="rounded-lg shadow-lg border-4 border-white"
-                style={{ width: size, height: size }}
-                alt="Agent QR"
-                onError={(e) => e.target.style.display = 'none'} // 极端情况隐藏
-            />
-        );
-    }
-
-    return <canvas ref={canvasRef} className="rounded-lg shadow-lg border-4 border-white" />;
+    return (
+        <img
+            src={apiUrl}
+            className="rounded-lg shadow-lg border-4 border-white block bg-white"
+            style={{ width: size, height: size }}
+            alt="Agent QR"
+        />
+    );
 };
 
 // --- ID Card Back Component ---
@@ -791,7 +760,7 @@ const SuccessScreen = ({ data, onReset }) => {
 
                 {/* 左侧：操作区 */}
                 <div className="flex-1 flex flex-col items-center text-center space-y-6">
-                    <h1 className="text-4xl font-black mb-2">任务完成！(V7)</h1>
+                    <h1 className="text-4xl font-black mb-2">任务完成！(V8)</h1>
                     <p className="text-xl text-slate-600">你的特工代号是：</p>
                     <div className={`text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r ${data.color}`}>
                         {data.name}
