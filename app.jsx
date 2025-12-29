@@ -147,7 +147,7 @@ const NAMES_DATA = [
 const HeroCard = ({ data, onClick }) => (
     <div
         onClick={onClick}
-        className="group relative aspect-[6/7] w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20"
+        className="group relative aspect-[4/5] w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20"
     >
         <div className={`absolute inset-0 bg-gradient-to-br ${data.color} opacity-80 transition-opacity group-hover:opacity-100`}></div>
         <div className="absolute -right-6 -bottom-6 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110 text-white md:-right-10 md:-bottom-10">
@@ -1208,7 +1208,7 @@ function App() {
                                 </button>
                             </div>
                         )}
-                        <h1 className="text-4xl md:text-7xl font-black mb-4 md:mb-8 leading-tight">选择你的 <br /><span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">英文代号 (v2.1)</span></h1>
+                        <h1 className="text-4xl md:text-7xl font-black mb-4 md:mb-8 leading-tight">选择你的 <br /><span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">英文代号</span></h1>
                         <p className="text-base md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">这里有三份顶级机密档案。每一个名字都蕴含着不同的力量。点击卡片，进入档案详情室，做出你的决定。</p>
                     </header>
                     <main className="max-w-6xl mx-auto px-4 md:px-8">
