@@ -577,10 +577,99 @@ const SimpleCameraCapture = ({ onCapture }) => {
     );
 };
 
+// --- QR Code Component ---
+const QRCodeCanvas = ({ text, size = 128 }) => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        if (canvasRef.current) {
+            // QRCode is global from the script tag
+            if (window.QRCode) {
+                window.QRCode.toCanvas(canvasRef.current, text, {
+                    width: size,
+                    margin: 2,
+                    color: {
+                        dark: '#0f172a', // Slate-900
+                        light: '#ffffff'
+                    }
+                }, function (error) {
+                    if (error) console.error(error);
+                });
+            }
+        }
+    }, [text, size]);
+
+    return <canvas ref={canvasRef} className="rounded-lg shadow-lg border-4 border-white" />;
+};
+
+// --- ID Card Back Component ---
+const IDCardBack = ({ data, cardRef }) => {
+    // Unique data for the QR code: URL + Action
+    // Example: Direct link to user profile or just a JSON string
+    const qrData = JSON.stringify({
+        agent: data.name,
+        code: `ZHAO-XIA-${data.id === 'xavier' ? '008' : data.id === 'julian' ? '009' : '007'}`,
+        type: 'AGENT_ID',
+        school: 'JAYLEN_STUDIO'
+    });
+
+    return (
+        <div ref={cardRef} className="w-[320px] h-[500px] bg-slate-900 relative overflow-hidden rounded-3xl border border-slate-700 select-none shadow-2xl flex flex-col items-center justify-center text-center p-8">
+            {/* Background Texture */}
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black"></div>
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(45deg, #1e293b 25%, transparent 25%, transparent 75%, #1e293b 75%, #1e293b), linear-gradient(45deg, #1e293b 25%, transparent 25%, transparent 75%, #1e293b 75%, #1e293b)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 10px 10px' }}></div>
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center gap-6">
+
+                {/* Header */}
+                <div className="space-y-1">
+                    <div className="text-[10px] tracking-[0.3em] text-indigo-400 font-mono">OFFICIAL AGENT ID</div>
+                    <div className="font-black text-2xl text-white tracking-tighter">JAYLEN<br />LANGUAGE STUDIO</div>
+                </div>
+
+                {/* QR Code Area */}
+                <div className="relative group">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 to-purple-500 opacity-30 blur-md rounded-xl animate-pulse"></div>
+                    <div className="relative bg-white p-2 rounded-xl">
+                        <QRCodeCanvas text={qrData} size={160} />
+                    </div>
+                    {/* Scan Line Animation */}
+                    <div className="absolute top-2 left-2 right-2 h-[2px] bg-red-500 shadow-[0_0_10px_red] animate-[scan-line_2s_linear_infinite] opacity-50 pointer-events-none"></div>
+                </div>
+
+                {/* Agent Info */}
+                <div className="space-y-2">
+                    <div className="text-sm font-bold text-white">{data.name.toUpperCase()}</div>
+                    <div className="text-[10px] font-mono text-slate-400 break-all px-4 max-w-[200px]">
+                        ID: {btoa(data.name).substring(0, 12)}...
+                    </div>
+                </div>
+
+                {/* Footer Warning */}
+                <div className="mt-4 border-t border-slate-700/50 pt-4 w-full">
+                    <p className="text-[8px] text-slate-500 leading-relaxed uppercase">
+                        Property of Jaylen Language Studio.<br />
+                        If found, return to HQ immediately.<br />
+                        Unauthorized use is prohibited.
+                    </p>
+                </div>
+            </div>
+
+            {/* Corner Accents */}
+            <div className="absolute top-4 left-4 w-3 h-3 border-l sm:border-t border-slate-500"></div>
+            <div className="absolute top-4 right-4 w-3 h-3 border-r sm:border-t border-slate-500"></div>
+            <div className="absolute bottom-4 left-4 w-3 h-3 border-l sm:border-b border-slate-500"></div>
+            <div className="absolute bottom-4 right-4 w-3 h-3 border-r sm:border-b border-slate-500"></div>
+        </div>
+    );
+};
+
 // --- SUCCESS SCREEN (Agent ID Card Version) ---
 const SuccessScreen = ({ data, onReset }) => {
     const [photo, setPhoto] = useState(null);
     const cardRef = useRef(null);
+    const backCardRef = useRef(null); // Back card ref
     const [isSharing, setIsSharing] = useState(false);
 
     // 生成图片 Blob (用于分享)
@@ -612,6 +701,23 @@ const SuccessScreen = ({ data, onReset }) => {
         } catch (err) {
             console.error("Export failed:", err);
             alert("下载失败，请手动截图保存。");
+        }
+    };
+
+    const handleDownloadBack = async () => {
+        if (!backCardRef.current) return;
+        try {
+            const canvas = await html2canvas(backCardRef.current, {
+                backgroundColor: null,
+                scale: 2
+            });
+            const link = document.createElement('a');
+            link.download = `Agent_${data.name}_Back.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        } catch (err) {
+            console.error("Export back failed:", err);
+            alert("背面生成失败");
         }
     };
 
@@ -680,7 +786,10 @@ const SuccessScreen = ({ data, onReset }) => {
                     <div className="flex flex-col gap-3 mt-4 w-full max-w-xs">
                         {/* 下载按钮 */}
                         <button onClick={handleDownload} className="w-full bg-slate-900 text-white px-6 py-4 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-3">
-                            <Icons.Download size={20} /> 保存特工证 (Save ID)
+                            <Icons.Download size={20} /> 保存正面 (Save Front)
+                        </button>
+                        <button onClick={handleDownloadBack} className="w-full bg-slate-100/50 hover:bg-slate-100 text-slate-800 border border-slate-300 px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm">
+                            <Icons.QrCode size={18} /> 下载背面 (QR Code)
                         </button>
 
                         <div className="flex gap-3">
@@ -776,6 +885,11 @@ const SuccessScreen = ({ data, onReset }) => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Hidden Back Card Render */}
+            <div className="fixed left-[100vw] top-0 pointer-events-none opacity-0">
+                <IDCardBack data={data} cardRef={backCardRef} />
             </div>
         </div>
     );
