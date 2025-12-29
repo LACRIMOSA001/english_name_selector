@@ -58,6 +58,15 @@ const AUDIO_URLS = {
     success: './audio/bgm_success.mp3' // Adventure Meme (Kevin MacLeod) - 胜利音效
 };
 
+// --- BGM VOLUME CONFIG (Mix Tuning) ---
+const BGM_VOLUMES = {
+    grid: 0.25,   // 下调：避免盖过旁白
+    xavier: 0.25, // 下调：Space 1990 本身响度较大
+    julian: 0.4,  // 中等
+    sean: 0.6,    // 上调：Cool Vibes 开头较弱
+    success: 0.5
+};
+
 // --- NARRATION AUDIO URLS (预生成的TTS音频文件) ---
 // 使用 Edge-TTS 生成的高质量中文旁白音频
 // 运行 python generate_narration_edge.py 生成这些文件
@@ -1075,7 +1084,8 @@ function App() {
         Object.entries(bgmRefs.current).forEach(([k, audio]) => {
             if (k === key) {
                 try {
-                    audio.volume = 0.5;
+                    // 使用预设的基准音量
+                    audio.volume = BGM_VOLUMES[k] || 0.5;
                     audio.currentTime = 0; // 从头开始播放
                     if (audio.paused) {
                         const p = audio.play();
@@ -1103,17 +1113,17 @@ function App() {
         // Ducking Logic (Aggressive)
         narrationAudioRef.current.onplay = () => {
             setIsSpeaking(true);
-            // 激进闪避：将所有正在播放的 BGM 压低到 10%
+            // 激进闪避：将所有正在播放的 BGM 压低到 5%
             Object.values(bgmRefs.current).forEach(bgm => {
-                if (!bgm.paused) bgm.volume = 0.1;
+                if (!bgm.paused) bgm.volume = 0.05;
             });
         };
 
         narrationAudioRef.current.onended = () => {
             setIsSpeaking(false);
-            // 恢复音量：将所有正在播放的 BGM 恢复到 50%
-            Object.values(bgmRefs.current).forEach(bgm => {
-                if (!bgm.paused) bgm.volume = 0.5;
+            // 恢复音量：根据各自的基准音量恢复
+            Object.entries(bgmRefs.current).forEach(([k, bgm]) => {
+                if (!bgm.paused) bgm.volume = BGM_VOLUMES[k] || 0.5;
             });
         };
 
