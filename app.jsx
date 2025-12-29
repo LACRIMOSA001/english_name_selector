@@ -1208,7 +1208,7 @@ function App() {
                                 </button>
                             </div>
                         )}
-                        <h1 className="text-4xl md:text-7xl font-black mb-4 md:mb-8 leading-tight">选择你的 <br /><span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">英文代号</span></h1>
+                        <h1 className="text-4xl md:text-7xl font-black mb-4 md:mb-8 leading-tight">选择你的 <br /><span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">英文代号 (v2)</span></h1>
                         <p className="text-base md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">这里有三份顶级机密档案。每一个名字都蕴含着不同的力量。点击卡片，进入档案详情室，做出你的决定。</p>
                     </header>
                     <main className="max-w-6xl mx-auto px-4 md:px-8">
