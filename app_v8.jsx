@@ -1098,19 +1098,23 @@ function App() {
         if (!audioUrl) return;
 
         narrationAudioRef.current.src = audioUrl;
+        narrationAudioRef.current.volume = 1.0; // 确保旁白始终最大声
 
-        // Ducking Logic
-        const currentBgmKey = narrationKey === 'success' ? 'success' : (viewState === 'detail' ? narrationKey : 'grid');
-        const currentBgm = bgmRefs.current[currentBgmKey] || bgmRefs.current['grid'];
-
+        // Ducking Logic (Aggressive)
         narrationAudioRef.current.onplay = () => {
             setIsSpeaking(true);
-            if (currentBgm && !currentBgm.paused) currentBgm.volume = 0.15;
+            // 激进闪避：将所有正在播放的 BGM 压低到 10%
+            Object.values(bgmRefs.current).forEach(bgm => {
+                if (!bgm.paused) bgm.volume = 0.1;
+            });
         };
 
         narrationAudioRef.current.onended = () => {
             setIsSpeaking(false);
-            if (currentBgm) currentBgm.volume = 0.5;
+            // 恢复音量：将所有正在播放的 BGM 恢复到 50%
+            Object.values(bgmRefs.current).forEach(bgm => {
+                if (!bgm.paused) bgm.volume = 0.5;
+            });
         };
 
         const p = narrationAudioRef.current.play();
