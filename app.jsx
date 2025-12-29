@@ -147,7 +147,7 @@ const NAMES_DATA = [
 const HeroCard = ({ data, onClick }) => (
     <div
         onClick={onClick}
-        className="group relative h-80 md:h-96 w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20"
+        className="group relative h-[420px] md:h-[500px] w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20"
     >
         <div className={`absolute inset-0 bg-gradient-to-br ${data.color} opacity-80 transition-opacity group-hover:opacity-100`}></div>
         <div className="absolute -right-6 -bottom-6 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110 text-white md:-right-10 md:-bottom-10">
@@ -734,7 +734,7 @@ const SuccessScreen = ({ data, onReset }) => {
                             </div>
 
                             <h2 className="text-3xl font-black uppercase tracking-wider mb-1">{data.name}</h2>
-                            <p className="font-mono text-indigo-400 text-sm mb-6">CODE: ZAO-XIA-008</p>
+                            <p className="font-mono text-indigo-400 text-sm mb-6">CODE: ZHAO-XIA-008</p>
 
                             <div className="w-full space-y-3 bg-slate-800/50 p-4 rounded text-sm mb-4 relative overflow-hidden">
                                 <div className="flex justify-between border-b border-slate-700/50 pb-1">
